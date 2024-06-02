@@ -1,6 +1,7 @@
 package com.lcl.gateway.web.handler;
 
 import com.lcl.gateway.DefaultGatewayPluginChain;
+import com.lcl.gateway.GatewayFilter;
 import com.lcl.gateway.GatewayPlugin;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,8 @@ public class GatewayWebHandler implements WebHandler {
 
     @Autowired
     List<GatewayPlugin> plugins;
+    @Autowired
+    List<GatewayFilter> filters;
 
     @Override
     public Mono<Void> handle(ServerWebExchange exchange) {
@@ -35,6 +38,11 @@ public class GatewayWebHandler implements WebHandler {
                     """;
             return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(mock.getBytes())));
         }
+
+        for (GatewayFilter filter : filters) {
+            filter.filter(exchange);
+        }
+
         // 循环所有的 plugin 处理
         return new DefaultGatewayPluginChain(plugins).handle(exchange);
 //        for(GatewayPlugin plugin : plugins){
