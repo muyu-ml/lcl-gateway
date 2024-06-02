@@ -1,6 +1,7 @@
 package com.lcl.gateway.plugin;
 
 import com.lcl.gateway.AbstarctGatewayPlugin;
+import com.lcl.gateway.GatewayPluginChain;
 import com.lcl.lclrpc.core.api.Loadbalancer;
 import com.lcl.lclrpc.core.api.RegistryCenter;
 import com.lcl.lclrpc.core.cluster.RoundRibonLoadbalancer;
@@ -38,7 +39,7 @@ public class DirectPlugin extends AbstarctGatewayPlugin {
     Loadbalancer<InstanceMeta> loadbalancer = new RoundRibonLoadbalancer<>();
 
     @Override
-    public Mono<Void> doHandle(ServerWebExchange exchange) {
+    public Mono<Void> doHandle(ServerWebExchange exchange, GatewayPluginChain chain) {
         log.info(" =======>>>>> [LclRpcPlugin]......");
 
         String backend = exchange.getRequest().getQueryParams().getFirst("backend");
@@ -51,7 +52,8 @@ public class DirectPlugin extends AbstarctGatewayPlugin {
 
         // 路径中不存在 backend，原样返回请求报文
         if(StringUtils.isBlank(backend)){
-            return requestBody.flatMap(x -> exchange.getResponse().writeWith(Mono.just(x))).then();
+            return requestBody.flatMap(x -> exchange.getResponse().writeWith(Mono.just(x)))
+                    .then(chain.handle(exchange));
         }
 
         // 通过 WebClient 发送请求
@@ -64,12 +66,13 @@ public class DirectPlugin extends AbstarctGatewayPlugin {
         Mono<String> body = entity.map(ResponseEntity::getBody);
 
         return body.flatMap( x -> exchange.getResponse()
-                .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(x.getBytes()))));
+                .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(x.getBytes()))))
+                .then(chain.handle(exchange));
     }
 
     @Override
     public boolean doSupport(ServerWebExchange exchange) {
-        return true;
+        return exchange.getRequest().getPath().value().startsWith(prefix);
     }
 
     @Override

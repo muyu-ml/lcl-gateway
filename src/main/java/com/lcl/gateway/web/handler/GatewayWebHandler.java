@@ -1,5 +1,6 @@
 package com.lcl.gateway.web.handler;
 
+import com.lcl.gateway.DefaultGatewayPluginChain;
 import com.lcl.gateway.GatewayPlugin;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,17 +36,18 @@ public class GatewayWebHandler implements WebHandler {
             return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(mock.getBytes())));
         }
         // 循环所有的 plugin 处理
-        for(GatewayPlugin plugin : plugins){
-            // 如果当前plugin支持本次请求，则调用 plugin handle 处理
-            if(plugin.support(exchange)){
-                return plugin.handle(exchange);
-            }
-        }
-        String mock = """
-                    {
-                      "result": "no support plugin"
-                    }
-                    """;
-        return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(mock.getBytes())));
+        return new DefaultGatewayPluginChain(plugins).handle(exchange);
+//        for(GatewayPlugin plugin : plugins){
+//            // 如果当前plugin支持本次请求，则调用 plugin handle 处理
+//            if(plugin.support(exchange)){
+//                return plugin.handle(exchange);
+//            }
+//        }
+//        String mock = """
+//                    {
+//                      "result": "no support plugin"
+//                    }
+//                    """;
+//        return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(mock.getBytes())));
     }
 }

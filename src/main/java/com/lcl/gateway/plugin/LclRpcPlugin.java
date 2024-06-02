@@ -1,6 +1,7 @@
 package com.lcl.gateway.plugin;
 
 import com.lcl.gateway.AbstarctGatewayPlugin;
+import com.lcl.gateway.GatewayPluginChain;
 import com.lcl.lclrpc.core.api.Loadbalancer;
 import com.lcl.lclrpc.core.api.RegistryCenter;
 import com.lcl.lclrpc.core.cluster.RoundRibonLoadbalancer;
@@ -37,7 +38,7 @@ public class LclRpcPlugin extends AbstarctGatewayPlugin {
     Loadbalancer<InstanceMeta> loadbalancer = new RoundRibonLoadbalancer<>();
 
     @Override
-    public Mono<Void> doHandle(ServerWebExchange exchange) {
+    public Mono<Void> doHandle(ServerWebExchange exchange, GatewayPluginChain chain) {
         log.info(" =======>>>>> [LclRpcPlugin]......");
 
         // 通过请求路径获取服务名
@@ -72,7 +73,8 @@ public class LclRpcPlugin extends AbstarctGatewayPlugin {
         exchange.getResponse().getHeaders().add("lcl.gw.plugin", getName());
 
         return body.flatMap( x -> exchange.getResponse()
-                .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(x.getBytes()))));
+                .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(x.getBytes()))))
+                .then(chain.handle(exchange));
     }
 
     @Override

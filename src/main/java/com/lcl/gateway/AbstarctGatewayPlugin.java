@@ -22,10 +22,10 @@ public abstract class AbstarctGatewayPlugin implements GatewayPlugin{
     }
 
     @Override
-    public Mono<Void> handle(ServerWebExchange exchange) {
+    public Mono<Void> handle(ServerWebExchange exchange, GatewayPluginChain chain) {
         boolean isSupported = support(exchange);
         log.info("========>>>> plugin[{}], support = {}", getName(), isSupported);
-        return isSupported ? doHandle(exchange) : Mono.empty();
+        return isSupported ? doHandle(exchange, chain) : chain.handle(exchange);
     }
 
     @Override
@@ -33,7 +33,7 @@ public abstract class AbstarctGatewayPlugin implements GatewayPlugin{
         return doSupport(exchange);
     }
 
-    public abstract Mono<Void> doHandle(ServerWebExchange exchange);
+    public abstract Mono<Void> doHandle(ServerWebExchange exchange, GatewayPluginChain chain);
 
     public abstract boolean doSupport(ServerWebExchange exchange);
 }
