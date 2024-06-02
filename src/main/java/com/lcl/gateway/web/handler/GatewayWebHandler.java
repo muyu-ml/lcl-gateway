@@ -1,4 +1,4 @@
-package com.lcl.gateway;
+package com.lcl.gateway.web.handler;
 
 import com.lcl.lclrpc.core.api.Loadbalancer;
 import com.lcl.lclrpc.core.api.RegistryCenter;

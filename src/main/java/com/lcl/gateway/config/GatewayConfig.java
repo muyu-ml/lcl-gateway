@@ -1,4 +1,4 @@
-package com.lcl.gateway;
+package com.lcl.gateway.config;
 
 import com.lcl.lclrpc.core.api.RegistryCenter;
 import com.lcl.lclrpc.core.registry.lcl.LclReigstryCenter;
