@@ -2,14 +2,34 @@
 GET http://localhost:8888/hello
 
 ### GET gw
-GET http://localhost:8888/gw
+GET http://localhost:8888/gwdemo
 
 ### GET gw
-GET http://localhost:8888/ga/aaa
+GET http://localhost:8888/gw/aaa
 
 
 ### POST user
-POST http://localhost:8888/ga/com.lcl.lclrpc.demo.api.UserService
+POST http://localhost:8888/gw/lclrpc/com.lcl.lclrpc.demo.api.UserService
+Content-Type: application/json
+
+{
+  "service": "com.lcl.lclrpc.demo.api.UserService",
+  "methodSign": "findById@1_int",
+  "args": [100]
+}
+
+### POST user
+POST http://localhost:8888/gw/direct/com.lcl.lclrpc.demo.api.UserService
+Content-Type: application/json
+
+{
+  "service": "com.lcl.lclrpc.demo.api.UserService",
+  "methodSign": "findById@1_int",
+  "args": [100]
+}
+
+### POST user
+POST http://localhost:8888/gw/direct/com.lcl.lclrpc.demo.api.UserService?backend=http://localhost:8083/lclrpc
 Content-Type: application/json
 
 {
